@@ -1,10 +1,12 @@
 import express from "express";
+import { VaultManager } from "./vaultManager";
+
 const app = express();
 const port = 3000; // default port to listen
 
 // define a route handler for the default home page
-app.get( "/", ( req, res ) => {
-    res.send( "Hello world!" );
+app.get( "/", async(req, res, next) => {
+    res.end(JSON.stringify(await new VaultManager().getRawVaults()));
 } );
 
 // start the Express server
