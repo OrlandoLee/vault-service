@@ -1,5 +1,7 @@
 import express from "express";
 import { VaultManager } from "./vaultManager";
+import cron from "node-cron";
+import * as child from 'child_process';
 
 const app = express();
 const port = 3000; // default port to listen
@@ -14,6 +16,16 @@ app.get( "/vaults", async(req, res, next) => {
 // start the Express server
 app.listen( port, () => {
     valueManager.turnCallBackOn();
+
+    try {
+        cron.schedule('0 8 * * *', () => {
+            child.exec('./backup_snapshot_script.sh');
+          });
+      } catch (e) {
+          // tslint:disable-next-line:no-console
+          console.log("failed", e);
+      }
+      
      // tslint:disable-next-line:no-console
     console.log( `server started at http://localhost:${ port }` );
 } );
