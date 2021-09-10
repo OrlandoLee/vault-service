@@ -36,4 +36,24 @@ public async getRawVaults () {
   }
   return result;
 }
+
+public turnCallBackOn () {
+    this.provider.on(this.topicSets, (log: { data: any; }) => {
+    // this.provider.on([null], (log: { data: any; }) => {
+        const resultData = log.data;
+        // const resultData = "0x0000000000000000000000000ce03e8163b2a88106093f5f4e6f9ee3da423997000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000038d7ea4c6800000000000000000000000000000000000000000000000000006f05b59d3b20000";
+        const parsedVaultCreated = this.iface.decodeEventLog("VaultCreated", resultData);
+        const newVault = {
+            'owner': parsedVaultCreated._user,
+            'collateral': ethers.utils.formatEther(parsedVaultCreated._collateral),
+            'debt': ethers.utils.formatEther(parsedVaultCreated._debt)
+        };
+        // tslint:disable-next-line:no-console
+        console.log('vault updated: ', parsedVaultCreated._user);
+        })
+}
+
+
+
+
 }
