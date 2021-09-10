@@ -1,5 +1,6 @@
 import { ethers } from "ethers";
 import * as fs from 'fs';
+import NodeCache from "node-cache";
 
 export class VaultManager {
     // store this key as a secret in docker
@@ -20,6 +21,11 @@ readonly vaultAbi = this.iface.format(ethers.utils.FormatTypes.full);
 
 // The Contract object
 readonly valutContract = new ethers.Contract(this.vaultAddress, this.vaultAbi, this.provider);
+
+// invalid cache every 24 hours
+// update cache when an event is consumed
+vaultCache = new NodeCache({ stdTTL: 3600*24});
+
 
 public async getRawVaults () {
   const result = [];
@@ -48,12 +54,25 @@ public turnCallBackOn () {
             'collateral': ethers.utils.formatEther(parsedVaultCreated._collateral),
             'debt': ethers.utils.formatEther(parsedVaultCreated._debt)
         };
+        this.vaultCache.set(parsedVaultCreated._user, newVault);
         // tslint:disable-next-line:no-console
         console.log('vault updated: ', parsedVaultCreated._user);
         })
 }
 
 
-
+public async getVaults () {
+  if(this.vaultCache.keys().length > 0){
+    return this.vaultCache.keys().map((address: string) => this.vaultCache.get(address));
+  } else {
+    const result = await this.getRawVaults();
+    result.forEach(vault => {
+        this.vaultCache.set(vault.owner, vault)
+    });
+    return result;
+  }
+}
 
 }
+
+

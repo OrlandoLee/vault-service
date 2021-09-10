@@ -7,8 +7,8 @@ const port = 3000; // default port to listen
 const valueManager = new VaultManager();
 
 // define a route handler for the default home page
-app.get( "/", async(req, res, next) => {
-    res.end(JSON.stringify(await valueManager.getRawVaults()));
+app.get( "/vaults", async(req, res, next) => {
+    res.end(JSON.stringify(await valueManager.getVaults()));
 } );
 
 // start the Express server
